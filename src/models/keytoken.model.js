@@ -10,7 +10,7 @@ var keyTokenSchema = new Schema({
         require:true,
         ref: 'Shop'
     },
-    private:{
+    privateKey:{
         type:String,
         required:true,
     },
@@ -18,9 +18,14 @@ var keyTokenSchema = new Schema({
         type:String,
         required:true,
     },
-    refreshToken:{
+    refreshTokensUsed:{
         type:Array,
-        default:[],
+        default:[], // những refreshtoken đã sử dụng
+       
+    },
+    refreshToken:{
+        type:String,
+        required:true,
        
     }
 },{
