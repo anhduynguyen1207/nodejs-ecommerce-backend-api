@@ -3,7 +3,7 @@
 const express = require('express')
 const productController = require('../../controllers/product.controller.js')
 const asyncHandler = require('../../helper/asyncHandler.js')
-const { authentication } = require('../../auth/authUtils.js')
+const { authenticationV2 } = require('../../auth/authUtils.js')
 const router = express.Router()
 
 //handler error
@@ -14,7 +14,7 @@ router.get('/:product_id', asyncHandler(productController.findDetailsProduct))
 
 
 //authentication//
-router.use(authentication)
+router.use(authenticationV2)
 /////////////////
 router.post('', asyncHandler(productController.createProduct))
 router.patch('/:productId', asyncHandler(productController.updateProduct))
