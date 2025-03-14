@@ -12,14 +12,18 @@ const findAllPublishForShop = async({query, limit, skip})=>{
     return await queryProduct({query, limit, skip})
 }
 const publishProductByShop = async ({product_shop, product_id})=>{
+    console.log('product_shop::',product_shop)
+    console.log('product_id::',product_id)
     const foundFound = await product.findOne({
-        product_shop: new Types.ObjectId(product_shop),
-        _id: new Types.ObjectId(product_id)
+        product_shop: convertToObjectIdMongodb(product_shop),
+        _id: convertToObjectIdMongodb(product_id)
     })
+    console.log('foundFound::',foundFound)
     if(!foundFound) return null
     foundFound.isDraft = false
     foundFound.isPublished = true
     const {mofifiedCount} = await foundFound.updateOne(foundFound)
+    console.log('mofifiedCount::',mofifiedCount)
     return mofifiedCount
 }
 
@@ -91,6 +95,19 @@ const getProductbyId = async (productId) =>{
     return await product.findOne({_id: convertToObjectIdMongodb(productId)}).lean()
 }
 
+const checkProductByServer = async (products) =>{
+    return await Promise.all(products.map(async product=>{
+        const foundProduct = await getProductbyId(product.productId)
+        if(foundProduct){
+            return {
+                price : foundProduct.product_price,
+                quantity: product.quantity,
+                productId: product.productId
+            }
+        }
+    }))
+}
+
 module.exports = {
     findAllDaftsForShop,
     publishProductByShop,
@@ -100,5 +117,6 @@ module.exports = {
     findAllProducts,
     findDetailsProduct,
     updateProductById,
-    getProductbyId
+    getProductbyId,
+    checkProductByServer
 }

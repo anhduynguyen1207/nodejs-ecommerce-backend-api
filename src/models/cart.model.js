@@ -34,12 +34,7 @@ var cartSchema = new Schema({
     cart_userId:{
         type:Number,
         required:true,
-    },
-    discount_code:{ 
-        type:Number,
-        required:true,
-    },
-    
+    }
 },{
     timestamps: true,
     collection: COLLECTION_NAME

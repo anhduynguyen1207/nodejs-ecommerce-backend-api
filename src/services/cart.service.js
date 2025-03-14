@@ -25,6 +25,7 @@ class CartService {
         }, options = {upsert: true, new:true}
         return await cartModel.findOneAndUpdate(query, updateOrInsert, options)
     }
+
     static async updateUserCartQuantity({userId, product}){
         const {productId, quantity} = product
         const query = {
@@ -41,23 +42,48 @@ class CartService {
     }
     /// END REPO CART //
 
-    static async addToCart({userId, product={}}){
-        //check cart tồn tại hay không
-        const userCart = await cartModel.findOne({cart_userId: userId})
-        if(!userCart){
-            //create cart for User
-            return await CartService.createUserCart({userId,product})
-        }
+    // static async addToCart({userId, product={}}){
+       
+    //     //check cart tồn tại hay không
+    //     const userCart = await cartModel.findOne({cart_userId: userId})
+    //     if(!userCart){
+    //         //create cart for User
+    //         return await CartService.createUserCart({userId,product})
+    //     }
+       
+    //     //nếu có giỏ hàng rồi những chưa có sản phẩm?
+    //     if(!userCart.cart_products.length){
+    //         userCart.cart_products = [product]
+    //         console.log('userCart.cart_products!!',userCart.cart_products)
+    //         return await userCart.save()
+    //     }
+    //     console.log('toi day roiiii!!')
+    //     //giỏ hàng tồn tại và có sản phẩm này thì update quantity
+    //     return await CartService.updateUserCartQuantity({userId,product})
+    // }
 
-        //nếu có giỏ hàng rồi những chưa có sản phẩm?
-        if(!userCart.cart_products.length){
-            userCart.cart_products = [product]
-            console.log('userCart.cart_products!!',userCart.cart_products)
-            return await userCart.save()
+    static async addToCart({ userId, product = {} }) {
+        // Kiểm tra giỏ hàng của user
+        const userCart = await cartModel.findOne({ cart_userId: userId, cart_state: 'active' });
+    
+        // Nếu giỏ hàng không tồn tại, tạo giỏ hàng mới
+        if (!userCart) {
+            return await CartService.createUserCart({ userId, product });
         }
-
-        //giỏ hàng tồn tại và có sản phẩm này thì update quantity
-        return await CartService.updateUserCartQuantity({userId,product})
+    
+        // Kiểm tra xem sản phẩm có trong giỏ hàng không
+        const productIndex = userCart.cart_products.findIndex(p => p.productId.toString() === product.productId.toString());
+    
+        if (productIndex !== -1) {
+            // Nếu sản phẩm đã tồn tại, tăng số lượng
+            return await CartService.updateUserCartQuantity({ userId, product });
+        } else {
+            // Nếu sản phẩm chưa có, thêm vào giỏ hàng
+            userCart.cart_products.push(product);
+        }
+    
+        // Lưu giỏ hàng đã cập nhật
+        return await userCart.save();
     }
 
     // update cart
